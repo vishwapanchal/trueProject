@@ -1,4 +1,4 @@
-🚀 The "Project Originality" Checker 🚀
+The trueProject 
 Welcome to the most groundbreaking, revolutionary, and paradigm-shifting software ever conceived in a university computer lab. This tool is single-handedly designed to solve the age-old problem of students maybe reusing old project ideas.
 
 We're basically superheroes, but for syllabus integrity. Please, hold your applause.
