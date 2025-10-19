@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# --- Automated Frontend Refactoring Script (v29 - Revert to Link Buttons UI) ---
+# --- Automated Frontend Refactoring Script (v30.2 - Reposition Widgets) ---
 
-echo "Starting frontend refactor to restore UI with link buttons..."
+echo "Starting frontend refactor to reposition widgets..."
 
 # 1. Ensure directory structure is correct
 mkdir -p src/components
 
 # 2. Recreate module files
-rm -f src/app/page.tsx src/components/AuthPage.tsx src/components/DashboardPage.tsx src/components/ProjectModal.tsx src/components/OriginalityChecker.tsx src/components/LoadingScreen.tsx src/components/AnimatedTitle.tsx src/components/DashboardLoading.tsx tailwind.config.ts
-touch src/app/page.tsx src/components/AuthPage.tsx src/components/DashboardPage.tsx src/components/ProjectModal.tsx src/components/OriginalityChecker.tsx src/components/LoadingScreen.tsx src/components/AnimatedTitle.tsx src/components/DashboardLoading.tsx tailwind.config.ts
+rm -f src/app/page.tsx src/components/AuthPage.tsx src/components/DashboardPage.tsx src/components/ProjectModal.tsx src/components/OriginalityChecker.tsx src/components/LoadingScreen.tsx src/components/AnimatedTitle.tsx src/components/DashboardLoading.tsx src/components/AnalogClock.tsx src/components/WeatherWidget.tsx tailwind.config.ts
+touch src/app/page.tsx src/components/AuthPage.tsx src/components/DashboardPage.tsx src/components/ProjectModal.tsx src/components/OriginalityChecker.tsx src/components/LoadingScreen.tsx src/components/AnimatedTitle.tsx src/components/DashboardLoading.tsx src/components/AnalogClock.tsx src/components/WeatherWidget.tsx tailwind.config.ts
 
 echo "Populating new component files..."
 
@@ -165,13 +165,125 @@ const AnimatedTitle = () => {
 export default AnimatedTitle;
 EOL
 
-# --- src/components/AuthPage.tsx (Reverted to Link Buttons UI) ---
+# --- src/components/WeatherWidget.tsx ---
+cat > src/components/WeatherWidget.tsx << 'EOL'
+"use client";
+
+import { useState, useEffect } from 'react';
+
+interface WeatherData {
+  temp: number;
+  description: string;
+  icon: string;
+  city: string;
+}
+
+const API_URL = 'http://127.0.0.1:8000';
+
+export default function WeatherWidget() {
+    const [weather, setWeather] = useState<WeatherData | null>(null);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchWeather = async () => {
+            try {
+                const response = await fetch(`${API_URL}/weather`);
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.detail || "Weather service is unavailable.");
+                }
+                const data = await response.json();
+                setWeather({
+                    temp: Math.round(data.temp),
+                    description: data.description,
+                    icon: data.icon,
+                    city: data.city,
+                });
+            } catch (err) {
+                setError(err instanceof Error ? err.message : "An unknown error occurred.");
+            }
+        };
+
+        fetchWeather();
+    }, []);
+
+    return (
+        <div className="w-48 h-24 rounded-2xl bg-slate-800/50 backdrop-blur-md shadow-lg border border-white/20 flex items-center justify-center p-4 text-white">
+            {error && <p className="text-xs text-red-400 text-center">{error}</p>}
+            {!weather && !error && <p className="text-xs">Loading weather...</p>}
+            {weather && (
+                <div className="flex items-center gap-4">
+                    <img src={`https://openweathermap.org/img/wn/${weather.icon}@2x.png`} alt={weather.description} className="w-12 h-12" />
+                    <div className="text-left">
+                        <p className="text-3xl font-bold">{weather.temp}°C</p>
+                        <p className="text-xs capitalize">{weather.city}</p>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+EOL
+
+# --- src/components/AnalogClock.tsx ---
+cat > src/components/AnalogClock.tsx << 'EOL'
+"use client";
+
+import { useState, useEffect, useRef } from 'react';
+
+export default function AnalogClock() {
+    const [time, setTime] = useState(new Date());
+    const animationFrameId = useRef<number>();
+
+    useEffect(() => {
+        const updateClock = () => {
+            setTime(new Date());
+            animationFrameId.current = requestAnimationFrame(updateClock);
+        };
+        animationFrameId.current = requestAnimationFrame(updateClock);
+        return () => {
+            if(animationFrameId.current) {
+                cancelAnimationFrame(animationFrameId.current);
+            }
+        };
+    }, []);
+
+    const seconds = time.getSeconds() + time.getMilliseconds() / 1000;
+    const minutes = time.getMinutes() + seconds / 60;
+    const hours = time.getHours() + minutes / 60;
+
+    const secondDegrees = (seconds / 60) * 360 + 90;
+    const minuteDegrees = (minutes / 60) * 360 + 90;
+    const hourDegrees = (hours / 12) * 360 + 90;
+
+    return (
+        <div className="w-36 h-36 rounded-full bg-slate-800/50 backdrop-blur-md shadow-lg border border-white/20 flex items-center justify-center relative">
+            <div className="w-2 h-2 bg-white rounded-full absolute z-10"></div>
+            <div className="w-full h-full relative">
+                <div style={{ transform: `rotate(${hourDegrees}deg)` }} className="w-1/2 h-1 bg-slate-300 absolute top-1/2 left-0 origin-right rounded-full">
+                    <div className="w-1/3 h-full bg-slate-300"></div>
+                </div>
+                <div style={{ transform: `rotate(${minuteDegrees}deg)` }} className="w-1/2 h-0.5 bg-slate-100 absolute top-1/2 left-0 origin-right rounded-full">
+                     <div className="w-1/4 h-full bg-transparent"></div>
+                </div>
+                <div style={{ transform: `rotate(${secondDegrees}deg)` }} className="w-1/2 h-0.5 bg-red-500 absolute top-1/2 left-0 origin-right rounded-full">
+                    <div className="w-1/5 h-full bg-transparent"></div>
+                </div>
+            </div>
+        </div>
+    );
+}
+EOL
+
+# --- src/components/AuthPage.tsx (Updated with final widget positions) ---
 cat > src/components/AuthPage.tsx << 'EOL'
 "use client";
 
 import { useState, FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import AnimatedTitle from './AnimatedTitle';
+import AnalogClock from './AnalogClock';
+import WeatherWidget from './WeatherWidget';
 
 type AuthMode = 'login' | 'student-register' | 'teacher-register' | null;
 type Role = 'student' | 'teacher';
@@ -195,15 +307,13 @@ export default function AuthPage({ onLogin }: { onLogin: (token: string, role: R
         <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="relative flex flex-col items-center justify-center min-h-screen p-4 text-white overflow-hidden animated-bg"
+            className="relative flex flex-col items-center justify-center min-h-screen p-4 bg-cover bg-center text-white overflow-hidden animated-bg"
         >
-            <div className="absolute top-8 left-8 z-20 flex flex-col gap-4">
-                <a href="https://rvce.edu.in" target="_blank" rel="noopener noreferrer" className="bg-slate-800/50 backdrop-blur-md border border-white/20 text-white font-semibold py-2 px-4 rounded-lg hover:bg-slate-700/50 transition-colors text-sm">
-                    Go to RVCE Website
-                </a>
-                <a href="https://fes-prd1.rvei.edu.in:4430/sap/bc/ui5_ui5/ui2/ushell/shells/abap/Fiorilaunchpad.html?sap-system-login-oninputprocessing=onProceed&sap-urlscheme=http&sap-client=700&sap-language=EN" target="_blank" rel="noopener noreferrer" className="bg-slate-800/50 backdrop-blur-md border border-white/20 text-white font-semibold py-2 px-4 rounded-lg hover:bg-slate-700/50 transition-colors text-sm">
-                    Login to SAP
-                </a>
+            <div className="absolute top-8 left-8 z-20">
+                <AnalogClock />
+            </div>
+            <div className="absolute top-8 right-8 z-20">
+                <WeatherWidget />
             </div>
 
             <div className="relative z-10 text-center mb-16">

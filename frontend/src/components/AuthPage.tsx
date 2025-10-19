@@ -3,6 +3,8 @@
 import { useState, FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import AnimatedTitle from './AnimatedTitle';
+import AnalogClock from './AnalogClock';
+import WeatherWidget from './WeatherWidget';
 
 type AuthMode = 'login' | 'student-register' | 'teacher-register' | null;
 type Role = 'student' | 'teacher';
@@ -26,15 +28,13 @@ export default function AuthPage({ onLogin }: { onLogin: (token: string, role: R
         <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="relative flex flex-col items-center justify-center min-h-screen p-4 text-white overflow-hidden animated-bg"
+            className="relative flex flex-col items-center justify-center min-h-screen p-4 bg-cover bg-center text-white overflow-hidden animated-bg"
         >
-            <div className="absolute top-8 left-8 z-20 flex flex-col gap-4">
-                <a href="https://rvce.edu.in" target="_blank" rel="noopener noreferrer" className="bg-slate-800/50 backdrop-blur-md border border-white/20 text-white font-semibold py-2 px-4 rounded-lg hover:bg-slate-700/50 transition-colors text-sm">
-                    Go to RVCE Website
-                </a>
-                <a href="https://fes-prd1.rvei.edu.in:4430/sap/bc/ui5_ui5/ui2/ushell/shells/abap/Fiorilaunchpad.html?sap-system-login-oninputprocessing=onProceed&sap-urlscheme=http&sap-client=700&sap-language=EN" target="_blank" rel="noopener noreferrer" className="bg-slate-800/50 backdrop-blur-md border border-white/20 text-white font-semibold py-2 px-4 rounded-lg hover:bg-slate-700/50 transition-colors text-sm">
-                    Login to SAP
-                </a>
+            <div className="absolute top-8 left-8 z-20">
+                <AnalogClock />
+            </div>
+            <div className="absolute top-8 right-8 z-20">
+                <WeatherWidget />
             </div>
 
             <div className="relative z-10 text-center mb-16">

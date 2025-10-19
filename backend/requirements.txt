@@ -6,6 +6,7 @@ psycopg2-binary
 pgvector
 openai
 python-dotenv
-
+email-validator
 passlib[bcrypt]
-python-jose[cryptography]
+python-jose[cryptography]httpx
+httpx

@@ -18,7 +18,6 @@ export default function WeatherWidget() {
     useEffect(() => {
         const fetchWeather = async () => {
             try {
-                // Call our own backend endpoint
                 const response = await fetch(`${API_URL}/weather`);
                 if (!response.ok) {
                     const errData = await response.json();
